@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import api from './api'
+import api, { auth } from './api'
+import AuthPage from './components/AuthPage'
 import TaskForm from './components/TaskForm'
 import TaskItem from './components/TaskItem'
 
@@ -11,6 +12,7 @@ const FILTERS = [
 ]
 
 export default function App() {
+  const [user, setUser] = useState(() => (auth.isAuthenticated() ? {} : null))
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -19,12 +21,27 @@ export default function App() {
   const [editing, setEditing] = useState(null)
 
   useEffect(() => {
+    if (!user) return
     api
       .list()
       .then(setTasks)
       .catch(() => setError("Couldn't load tasks. Check that the backend is running."))
       .finally(() => setLoading(false))
-  }, [])
+  }, [user])
+
+  const counts = useMemo(() => {
+    const c = { all: tasks.length, todo: 0, 'in-progress': 0, done: 0 }
+    tasks.forEach((t) => c[t.status]++)
+    return c
+  }, [tasks])
+
+  const logout = () => {
+    auth.logout()
+    setUser(null)
+    setTasks([])
+  }
+
+  if (!user) return <AuthPage onAuthenticated={setUser} />
 
   // Runs an API call, shows an error banner on failure, returns true on success.
   const run = async (fn) => {
@@ -60,12 +77,6 @@ export default function App() {
       if (editing?._id === task._id) setEditing(null)
     })
 
-  const counts = useMemo(() => {
-    const c = { all: tasks.length, todo: 0, 'in-progress': 0, done: 0 }
-    tasks.forEach((t) => c[t.status]++)
-    return c
-  }, [tasks])
-
   const visible = tasks.filter((t) => {
     const q = query.trim().toLowerCase()
     const matches = !q || `${t.title} ${t.description || ''}`.toLowerCase().includes(q)
@@ -74,11 +85,14 @@ export default function App() {
 
   return (
     <main className="app">
-      <header>
-        <h1>Student Task Manager</h1>
-        <p className="muted">
-          {counts.done} of {counts.all} tasks done
-        </p>
+      <header className="top-bar">
+        <div>
+          <h1>Student Task Manager</h1>
+          <p className="muted">
+            {counts.done} of {counts.all} tasks done
+          </p>
+        </div>
+        <button onClick={logout}>Log out</button>
       </header>
 
       <TaskForm editing={editing} onSave={save} onCancel={() => setEditing(null)} />

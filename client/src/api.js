@@ -5,6 +5,32 @@ import axios from 'axios'
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 const http = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api' })
 
+const TOKEN_KEY = 'stm-token'
+export const getToken = () => localStorage.getItem(TOKEN_KEY)
+const setToken = (token) => localStorage.setItem(TOKEN_KEY, token)
+const clearToken = () => localStorage.removeItem(TOKEN_KEY)
+
+http.interceptors.request.use((config) => {
+  const token = getToken()
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+export const auth = {
+  isAuthenticated: () => Boolean(getToken()),
+  register: async ({ name, email, password }) => {
+    const { data } = await http.post('/auth/register', { name, email, password })
+    setToken(data.token)
+    return data.user
+  },
+  login: async ({ email, password }) => {
+    const { data } = await http.post('/auth/login', { email, password })
+    setToken(data.token)
+    return data.user
+  },
+  logout: clearToken,
+}
+
 const KEY = 'stm-mock-tasks'
 const read = () => JSON.parse(localStorage.getItem(KEY) || '[]')
 const write = (tasks) => localStorage.setItem(KEY, JSON.stringify(tasks))
