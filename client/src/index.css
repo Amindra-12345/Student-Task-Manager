@@ -81,3 +81,24 @@ textarea { resize: vertical; }
   .controls { grid-column: 1 / -1; justify-content: flex-start; }
   .toolbar input { width: 100%; }
 }
+
+.top-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.auth { min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; }
+.auth-card {
+  width: 100%; max-width: 380px; display: grid; gap: 14px; padding: 28px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+}
+.auth-card label { display: grid; gap: 4px; font-size: 0.9rem; font-weight: 500; }
+.auth-card h1 { font-size: 1.5rem; }
+.field-error { color: var(--danger); font-size: 0.82rem; font-weight: 400; }
+.password-field { display: flex; gap: 6px; }
+.password-field input { flex: 1; }
+button.ghost { background: none; border-color: transparent; padding: 8px 10px; }
+button.ghost:hover:not(:disabled) { border-color: var(--line); }
+button.link {
+  background: none; border: none; padding: 0; color: var(--accent);
+  font-weight: 600; cursor: pointer; text-decoration: underline;
+}
+.switch { margin-top: 4px; }
+.auth-card button.primary { width: 100%; }
