@@ -1,5 +1,4 @@
 services:
-
   mongodb:
     image: mongo:8
     container_name: student-task-mongodb
@@ -8,6 +7,11 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -24,7 +28,8 @@ services:
       JWT_SECRET: change-me-to-a-long-random-string
       JWT_EXPIRES_IN: 7d
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
 
   frontend:
     build:
