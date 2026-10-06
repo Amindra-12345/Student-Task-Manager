@@ -10,6 +10,8 @@ services:
       - mongodb_data:/data/db
 
   backend:
+    build:
+      context: ./server
     image: student-task-backend:latest
     container_name: student-task-backend
     restart: unless-stopped
@@ -25,6 +27,8 @@ services:
       - mongodb
 
   frontend:
+    build:
+      context: ./client
     image: student-task-frontend:latest
     container_name: student-task-frontend
     restart: unless-stopped
